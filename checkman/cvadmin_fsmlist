@@ -1,11 +1,11 @@
-title: Check for Apple XSAN, monitors any FSM processes on the machine.
+title: Check for Apple CVADMIN, monitors any FSM processes on the machine.
 agents: darwin
 author: Jeremy Leggat <jleggat@asu.edu>
 license: GPL
 distribution:
 description:
  This check makes use of the output of a working {cvadmin} on
- an OS X system. If the XSAN is properly configured and the system is a
+ an OS X system. If the CVADMIN is properly configured and the system is a
  file system master, then the fsmlist contains the names of all
  volumes hosted on your SAN.
 
@@ -13,7 +13,7 @@ item:
  The Volume name.
 
 inventory:
- One FSM processe is created per volumes if system is a XSAN Controller.
+ One FSM processe is created per volumes if system is a CVADMIN Controller.
 
 perfdata:
  FSM check launch count and core dump count.

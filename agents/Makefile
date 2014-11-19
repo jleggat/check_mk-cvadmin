@@ -1,5 +1,5 @@
 #
-#  An installer for check_mk agent xsan plugins
+#  An installer for check_mk agent cvadmin plugins
 #
 #  Author:  Jeremy Leggat
 #  Created: 08/26/13
@@ -10,12 +10,12 @@
 #
 include /usr/local/share/luggage/luggage.make
 
-TITLE=check_mk_agent_xsan
+TITLE=check_mk_agent_cvadmin
 REVERSE_DOMAIN=de.mathias-kettner.check_mk
 
 PAYLOAD = \
-	pack-mk-plugins-xsan \
-	pack-mk-plugins-xsan_cvlog
+	pack-mk-plugins-cvadmin \
+	pack-mk-plugins-cvlog
 
 
 # Make sure /usr/lib/check_mk_agent exists

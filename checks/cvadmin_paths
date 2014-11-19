@@ -1,3 +1,4 @@
+#!/usr/bin/python
 # -*- encoding: utf-8; py-indent-offset: 4 -*-
 # +------------------------------------------------------------------+
 # |             ____ _               _        __  __ _  __           |
@@ -25,7 +26,7 @@
 
 # Author: Jeremy Leggat <jleggat@asu.edu>
 
-### Collect and dump XSAN information.
+### Collect and dump CVADMIN information.
 # from `cvadmin -e fsmlist` will put out:
 # fsm	name index port pid ismaster state timestamp launchcount coredumps flags lastadminaction timestamp lastterminationcode timestamp
 # For each volume will put out `cvadmin -F Volume -e stat` with:
@@ -39,72 +40,54 @@
 # disks	name device	sectors	sectorsize
 import re
 
-def extract_fsm(text):
-	m = re.search('^\*?(\w+)\[\d+\]', text)
-	if m:
-		return m.group(1)
-
-## XSAN FSM
+## CVADMIN PATHS
 # the inventory function
-def inventory_xsan_fsmlist(checkname, info):
+def inventory_cvadmin_paths(checkname, info):
     inventory = []
+#    controller = ""
     for line in info:
-    	fs = extract_fsm(line[0])
+    	if line[0] == 'Controller:':
+ #   		controller = re.sub('[\<\>]', '', line[1])
+    		continue
     	params = {}
-    	flags = list_get_next(line, "flags")
-    	params["flags"] = re.sub('[<>]', '', flags)
-    	if fs: inventory.append( (fs, params) )
+ #   	params["controller"] = controller
+    	params["state"] = list_get_next(line, "state:")
+    	inventory.append( (line[0], params) )
     return inventory
 
 # the check function
-def check_xsan_fsmlist(item, params, info):
-    perfdata = []
+def check_cvadmin_paths(item, params, info):
     infos = []
     status = 0
     for line in info:
-    	# is this our line?
-    	fs = extract_fsm(line[0])
-    	if fs == item:
-			port = list_get_next(line, "port")
-			pid = list_get_next(line, "pid")
-			launches = list_get_next(line, "Launches")
-			dumps = list_get_next(line, "dumps")
-			flags = list_get_next(line, "flags")
-			flags = re.sub('[<>]', '', flags)
-			state = list_get_next(line, "State:")
-#			ymd = list_get_next(line, state)
-#			hms = list_get_next(line, ymd)
+    	if line[0] == item:
+			state = list_get_next(line, "state:")
+			lun = list_get_next(line, "lun:")
+			ctl = list_get_next(line, "ctl:")
+			hba = list_get_next(line, "hba:")
+			device = list_get_next(line, "device:")
 
-			this_time = time.time()
-
-			launch_timedif, launch_rate = get_counter( "xsan_fsmlist.launchcount.%s" % (item), this_time, int(launches) )
-			perfdata.append( ( "launch_count", launch_rate ) )
-
-			dump_timedif, dump_rate = get_counter( "xsan_fsmlist.coredumps.%s" % (item), this_time, int(dumps) )
-			perfdata.append( ( "core_dumps", dump_rate ) )
-
-			infos.append( state )
-			if state not in params["allowed_fsm_states"]:
+			if state != params["state"]:
+				infos.append( "Expected %s state" % params["state"] )
 				infos[-1] += "(!!)"
 				status = max(status, 2)
+			infos.append( "current state %s" % state  )
+			infos.append( "hba %s" % hba )
+			infos.append( "controller %s" % ctl )
+			infos.append( "lun %s" % lun )
+			infos.append( "device name %s" % device )
 
-			if flags != params["flags"]:
-				infos.append ("flags: %s not %s as expected" % (flags, params["flags"]) )
-				infos[-1] += "(!)"
-				status = max(status, 1)
+			return ( status, ", ".join(infos) )
 
-			infos.append ("pid: %s port: %s launch count: %s core dumps: %s" % (pid, port, launches, dumps) )
-			return (status, ", ".join(infos) , perfdata)
-
-    return (3, "file system %s not found in agent output" % item)
+#    return (params["path_not_found_level"], "Path %s not found in agent output" % item)
 
 # declare the check to Check_MK
-check_info["xsan_fsmlist"] = {
-	'check_function':			check_xsan_fsmlist,
-	'inventory_function':		inventory_xsan_fsmlist,
-	"service_description":		"XSAN Vol %s File System Master",
-	"default_levels_variable":	"xsan_default_levels",
-	"has_perfdata":				True,
-    "includes"                : [ "xsan.include" ],
+check_info["cvadmin_paths"] = {
+	'check_function':			check_cvadmin_paths,
+	'inventory_function':		inventory_cvadmin_paths,
+	"service_description":		"CVADMIN Path %s",
+	"default_levels_variable":	"cvadmin_default_levels",
+    "includes"                : [ "cvadmin.include" ],
+	"has_perfdata":				False,
     "group"                   : "filesystem",
 }

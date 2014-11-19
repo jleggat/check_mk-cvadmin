@@ -25,7 +25,7 @@
 
 # Author: Jeremy Leggat <jleggat@asu.edu>
 
-### Collect and dump XSAN information.
+### Collect and dump CVADMIN information.
 # from `cvadmin -e fsmlist` will put out:
 # fsm	name index port pid ismaster state timestamp launchcount coredumps flags lastadminaction timestamp lastterminationcode timestamp
 # For each volume will put out `cvadmin -F Volume -e stat` with:
@@ -38,7 +38,7 @@
 # for disks:
 # disks	name device	sectors	sectorsize
 
-factory_settings["xsan_default_levels"] = {
+factory_settings["cvadmin_default_levels"] = {
     "allowed_fsm_states" : ["REGISTERED"],
     "path_not_found_level" : 1,
 }

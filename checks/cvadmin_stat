@@ -25,7 +25,7 @@
 
 # Author: Jeremy Leggat <jleggat@asu.edu>
 
-### Collect and dump XSAN information.
+### Collect and dump CVADMIN information.
 # from `cvadmin -e fsmlist` will put out:
 # fsm   name index port pid ismaster state timestamp launchcount coredumps flags lastadminaction timestamp lastterminationcode timestamp
 # For each volume will put out `cvadmin -F Volume -e stat` with:
@@ -39,16 +39,16 @@
 # disks name device sectors sectorsize
 import re
 
-## XSAN Status Disk Usage ##
+## CVADMIN Status Disk Usage ##
 # the inventory function
-def inventory_xsan_stat_df(checkname, info):
+def inventory_cvadmin_stat_df(checkname, info):
     inventory = []
     for line in info:
         inventory.append( (line[0], {}) )
     return inventory
 
 # the check function
-def check_xsan_stat_df(item, params, info):
+def check_cvadmin_stat_df(item, params, info):
     p = re.compile(r'\(.*\)')
     for line in info:
         # is this our line?
@@ -66,9 +66,9 @@ def check_xsan_stat_df(item, params, info):
 
     return (3, "UNKNOWN - %s info not found" % item)
 
-## XSAN Status Info check ##
+## CVADMIN Status Info check ##
 # the inventory function
-def inventory_xsan_stat_info(checkname, info):
+def inventory_cvadmin_stat_info(checkname, info):
     inventory = []
     for line in info:
         params = {}
@@ -82,7 +82,7 @@ def inventory_xsan_stat_info(checkname, info):
     return inventory
 
 # the check function
-def check_xsan_stat_info(item, params, info):
+def check_cvadmin_stat_info(item, params, info):
     p = re.compile(r'\(.*\)')
     perfdata = []
     infos = []
@@ -141,22 +141,22 @@ def check_xsan_stat_info(item, params, info):
     return (3, "UNKNOWN - %s info not found" % item)
 
 # declare the checks to Check_MK
-check_info['xsan_stat.df'] = {
-    "inventory_function"      : inventory_xsan_stat_df,
-    "check_function"          : check_xsan_stat_df,
-    "service_description"     : "XSAN fs_%s",
-    "default_levels_variable" : "xsan_default_levels",
-    "includes"                : [ "df.include", "xsan.include" ],
+check_info['cvadmin_stat.df'] = {
+    "inventory_function"      : inventory_cvadmin_stat_df,
+    "check_function"          : check_cvadmin_stat_df,
+    "service_description"     : "CVADMIN fs_%s",
+    "default_levels_variable" : "cvadmin_default_levels",
+    "includes"                : [ "df.include", "cvadmin.include" ],
     "has_perfdata"            : True,
     "group"                   : "filesystem",
 }
 
-check_info['xsan_stat.info'] = {
-    "inventory_function"      : inventory_xsan_stat_info,
-    "check_function"          : check_xsan_stat_info,
-    "service_description"     : "XSAN Stats %s",
-    "default_levels_variable" : "xsan_default_levels",
-    "includes"                : [ "xsan.include" ],
+check_info['cvadmin_stat.info'] = {
+    "inventory_function"      : inventory_cvadmin_stat_info,
+    "check_function"          : check_cvadmin_stat_info,
+    "service_description"     : "CVADMIN Stats %s",
+    "default_levels_variable" : "cvadmin_default_levels",
+    "includes"                : [ "cvadmin.include" ],
     "has_perfdata"            : True,
     "group"                   : "filesystem",
 }

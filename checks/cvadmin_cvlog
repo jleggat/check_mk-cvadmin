@@ -25,7 +25,7 @@
 
 # Author: Jeremy Leggat <jleggat@asu.edu>
 
-### Collect and dump XSAN information.
+### Collect and dump CVADMIN information.
 # from `cvadmin -e fsmlist` will put out:
 # fsm   name index port pid ismaster state timestamp launchcount coredumps flags lastadminaction timestamp lastterminationcode timestamp
 # For each volume will put out `cvadmin -F Volume -e stat` with:
@@ -39,9 +39,9 @@
 # disks name device sectors sectorsize
 import re
 
-## XSAN CVLOG
+## CVADMIN CVLOG
 # the inventory function
-def inventory_xsan_cvlog(checkname, info):
+def inventory_cvlog(checkname, info):
     inventory = []
     for line in info:
         if line[7] != 'HiPriWr': continue
@@ -50,7 +50,7 @@ def inventory_xsan_cvlog(checkname, info):
     return inventory
 
 # the check function
-def check_xsan_cvlog(item, params, info):
+def check_cvlog(item, params, info):
     perfdata = []
     infos = []
     status = 0
@@ -96,12 +96,12 @@ def check_xsan_cvlog(item, params, info):
     return (3, "cvlog updates for %s not found in agent output" % item)
 
 # declare the check to Check_MK
-check_info["xsan_cvlog"] = {
-    'check_function':           check_xsan_cvlog,
-    'inventory_function':       inventory_xsan_cvlog,
-    "service_description":      "XSAN Performance %s",
-    "default_levels_variable":  "xsan_default_levels",
+check_info["cvlog"] = {
+    'check_function':           check_cvlog,
+    'inventory_function':       inventory_cvlog,
+    "service_description":      "CVLOG Performance %s",
+    "default_levels_variable":  "cvlog_default_levels",
     "has_perfdata":             True,
-    "includes"                : [ "xsan.include" ],
+    "includes"                : [ "cvlog.include" ],
     "group"                   : "filesystem",
 }

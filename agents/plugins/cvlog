@@ -11,7 +11,7 @@ if [ -z $CVLOGS ]; then
   exit
 fi
 
-echo '<<<xsan_cvlog>>>'
+echo '<<<cvlog>>>'
 
 for FILE in $CVLOGS; do
   VOLNAME=$(basename $(dirname $(dirname $CVLOGS)))
