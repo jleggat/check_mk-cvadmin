@@ -31,15 +31,16 @@ if [ -n "$FSM_VOLS" ]; then
   done
 fi
 
-CVADMIN_VOLS=$(cvadmin -e select | sed  -n 's/ [0-9]*>.\([A-z0-9]*\)\[.*/\1/p' | sort | uniq)
-if [ -n "$CVADMIN_VOLS" ]; then
-  echo '<<<cvadmin_paths>>>'
-  for VOL in $FSM_VOLS
-    cvadmin -F $VOL -e paths 2>/dev/null | sed -e '1,/acfs/d' | xargs -L1 echo $VOL
-  done
+PATHS_OUT=$(cvadmin -e paths 2>/dev/null | sed -e '1,/acfs/d')
+if [ -n "$PATHS_OUT" ]
+then
+echo '<<<cvadmin_paths>>>'
+  echo "$PATHS_OUT"
+fi
 
+DISKS_OUT=$(cvadmin -e disks 2>/dev/null | sed -e '1,/acfs/d')
+if [ -n "$DISKS_OUT" ]
+then
   echo '<<<cvadmin_disks>>>'
-  for VOL in $FSM_VOLS
-    cvadmin -F $VOL -e disks 2>/dev/null | sed -e '1,/acfs/d' | xargs -L1 echo $VOL
-  done
+  echo "$DISKS_OUT"
 fi
