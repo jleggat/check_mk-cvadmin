@@ -1,5 +1,5 @@
  {'author': 'Jeremy Leggat (jleggat@asu.edu)',
- 'description': 'Checks for StoreNext SANs, including XSans, using the cvadmin command.',
+ 'description': 'Variety of Checks for StoreNext SANs, including XSans, using the cvadmin command.',
  'download_url': 'http://example.com/vtrak/',
  'files': {'agents': ['plugins/cvadmin'],
            'checkman': ['cvadmin_fsmlist',
