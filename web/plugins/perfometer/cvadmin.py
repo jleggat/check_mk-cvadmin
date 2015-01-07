@@ -5,9 +5,3 @@ def perfometer_check_mk_cvadmin_stat_info(row, check_command, perf_data):
 	return "%d" % int(perf_data[0][1]), perfometer_logarithmic(perf_data[0][1], 20, 2, color)
 
 perfometers["check_mk-cvadmin_stat.info"] = perfometer_check_mk_cvadmin_stat_info
-
-def perfometer_check_mk_cvlog(row, check_command, perf_data):
-    lag = float(perf_data[0][1])
-    return "%d" % int(lag), perfometer_logarithmic(lag, 2000, 1.5, "#88c")
-
-perfometers["check_mk-cvlog"] = perfometer_check_mk_cvlog

@@ -24,99 +24,85 @@
 # to the Free Software Foundation, Inc., 51 Franklin St,  Fifth Floor,
 # Boston, MA 02110-1301 USA.
 
-# Author: Jeremy Leggat <jleggat@asu.edu>
+# <<<cvadmin_show_long>>>
+# VOLUME Stripe Group 0 [MetadataAndJournal]  Status:Up,MetaData,Journal,Exclusive   Total Blocks:45775744 (698.48 GB)  Reserved:0 (0.00 B) Free:45680420 (697.03 GB) (99%)   MultiPath Method:Rotate     Primary  Stripe [MetadataAndJournal]  Read:Enabled  Write:Enabled
+# VOLUME Stripe Group 1 [Video-1]  Status:Up   Total Blocks:1098630080 (16.37 TB)  Reserved:270720 (4.13 GB) Free:379663753 (5.66 TB) (34%)   MultiPath Method:Rotate     Primary  Stripe [Video-2]  Read:Enabled  Write:Enabled
 
-### Collect and dump CVADMIN information.
-# from `cvadmin -e fsmlist` will put out:
-# fsm	name index port pid ismaster state timestamp launchcount coredumps flags lastadminaction timestamp lastterminationcode timestamp
-# For each volume will put out `cvadmin -F Volume -e stat` with:
-# stats	volume timestamp activeconnections blocksize devices groups blockstotal blocksfree
-# and `cvadmin -F Volume -e show long` with:
-# stripe volume	number name status totalblocks reserverblocks freeblocks
-# not output with above: multipathmethod primarystripe readenabled writeenbaled
-# for paths:
-# paths	name device	hba	ctl	lun	state	controller
-# for disks:
-# disks	name device	sectors	sectorsize
-import re
 
-## CVADMIN Stripe Groups
-# the inventory function
 def inventory_cvadmin_show_long(checkname, info):
 	inventory = []
 	for line in info:
 		params = {}
 		params["index"] = line[3]
-		params["status"] = line[5].split(':').pop()
-		params["blocks"] = line[7].split(':').pop()
-		params["reserved"] = line[10].split(':').pop()
-		params["method"] = line[18].split(':').pop()
-		params["read"] = line[22].split(':').pop()
-		params["write"] = line[23].split(':').pop()
-		inventory.append( ( "%s_%s" % ( line[0], re.sub('[\[\]]', '', line[4]) ), params ) )
+		params["status"] = line[5].partition(':')[2]
+		params["blocks"] = line[7].partition(':')[2]
+		params["reserved"] = line[10].partition(':')[2]
+		params["method"] = line[18].partition(':')[2]
+		params["read"] = line[22].partition(':')[2]
+		params["write"] = line[23].partition(':')[2]
+		inventory.append( ( "_".join( [line[0], line[4].translate(None, '[]')] ), params ) )
 	return inventory
 
-# the check function
+
 def check_cvadmin_show_long(item, params, info):
-    infos = []
-    state = 0
     for line in info:
-    	name = "%s_%s" % ( line[0], re.sub('[\[\]]', '', line[4]) )
+    	name = "_".join( [line[0], line[4].translate(None, '[]')] )
     	if name == item:
+			infotext = []
+			worst_state = 0
+
 			index = line[3]
-			status = line[5].split(':').pop()
-			blocks = line[7].split(':').pop()
-			reserved = line[10].split(':').pop()
-			method = line[18].split(':').pop()
-			read = line[22].split(':').pop()
-			write = line[23].split(':').pop()
+			status = line[5].partition(':')[2]
+			blocks = line[7].partition(':')[2]
+			reserved = line[10].partition(':')[2]
+			method = line[18].partition(':')[2]
+			read = line[22].partition(':')[2]
+			write = line[23].partition(':')[2]
 
+			infotext.append( "Status %s" % status )
 			if status != params["status"]:
-				infos.append( "Status %s expected" % params["status"] )
-				infos[-1] += "(!!)"
-				state = max(state, 2)
-			infos.append( status )
+				infotext.append( "%s Expected" % params["status"] )
+				worst_state = max(worst_state, 2)
 
+			infotext.append( "Read: %s" % read )
 			if read != params["read"]:
-				infos.append( "Expected read %s" % params["read"] )
-				infos[-1] += "(!)"
-				state = max(state, 1)
-			infos.append( "Read: %s" % read )
+				infotext.append( "Expected %s" % params["read"] )
+				worst_state = max(worst_state, 1)
 
+			infotext.append( "Write: %s" % write )
 			if write != params["write"]:
-				infos.append( "Expected write %s" % params["write"] )
-				infos[-1] += "(!)"
-				state = max(state, 1)
-			infos.append( "Write: %s" % write )
+				infotext.append( "Expected %s" % params["write"] )
+				worst_state = max(worst_state, 1)
 
+			infotext.append( "MultiPath Method: %s" % method )
 			if method != params["method"]:
-				infos.append ("Expected: %s" % params["method"] )
-				infos[-1] += "(!)"
-				state = max(state, 1)
-			infos.append( "MultiPath Method: %s" % method )
+				infotext.append ("Expected: %s" % params["method"] )
+				worst_state = max(worst_state, 1)
 
 			if blocks != params["blocks"]:
-				infos.append ("%s Total Blocks but %s expected" % (blocks, params["blocks"]) )
-				infos[-1] += "(!)"
-				state = max(state, 1)
+				infotext.append ("%s Total Blocks but %s expected" % (blocks, params["blocks"]) )
+				worst_state = max(worst_state, 1)
 
 			if reserved != params["reserved"]:
-				infos.append ("%s Reserved Blocks but %s expected" % (reserved, params["reserved"]) )
-				infos[-1] += "(!)"
-				state = max(state, 1)
+				infotext.append ("%s Reserved Blocks but %s expected" % (reserved, params["reserved"]) )
+				worst_state = max(worst_state, 1)
 
-			infos.append( "%s %s" % (line[8], line[9]) )
-			return ( state, ", ".join(infos) )
+			infotext.append( "%s %s" % (line[8], line[9]) )
 
-    return (3, "UNKNOWN - %s info not found" % item)
+			if worst_state == 1:
+				infotext[-1] += "(!)"
+			elif worst_state == 2:
+				infotext[-1] += "(!!)"
 
-# declare the check to Check_MK
+			return worst_state, ", ".join(infotext)
+
+    return 3, "%s not found" % item
+
+
 check_info['cvadmin_show_long'] = {
     "inventory_function"      : inventory_cvadmin_show_long,
     "check_function"          : check_cvadmin_show_long,
-    "has_perfdata"            : False,
-    "service_description"     : "CVADMIN Stripe Group %s ",
-    "default_levels_variable" : "cvadmin_default_levels",
+    "service_description"     : "CVADMIN Stripe Group %s",
     "includes"                : [ "cvadmin.include" ],
     "group"                   : "filesystem",
 }

@@ -62,8 +62,7 @@ def check_cvadmin_paths(item, params, info):
 			if worst_state == 2:
 				infotext[-1] += "(!!)"
 
-
-			return ( worst_state, ", ".join(infotext) )
+			return worst_state, ", ".join(infotext)
 
     return 3, "Path %s not found" % item
 

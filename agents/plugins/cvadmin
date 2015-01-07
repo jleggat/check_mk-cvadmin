@@ -3,8 +3,7 @@
 type cvadmin > /dev/null || exit 0
 
 # the $1=$1 is to rebuild the record, using the current OFS.
-
-FSM_OUT=$(cvadmin -e fsmlist 2>/dev/null | awk 'BEGIN { FS="\n"; RS="" } !/^ /{next} {gsub(/,/, ""); $1=$1}1')
+FSM_OUT=$(cvadmin -e fsmlist 2>/dev/null | awk 'BEGIN { FS="\n"; RS="" } !/^[\* ]/{next} {gsub(/,/, ""); $1=$1}1')
 
 if [ -n "$FSM_OUT" ]; then
   echo '<<<cvadmin_fsmlist>>>'

@@ -6,11 +6,10 @@ distribution:
 description:
  This check makes use of the output of a working {cvadmin} on
  an StoreNext system. If the CVADMIN is properly configured and {cvadmin}
- is installed, then the agent will output output a list of LUNs visible
- to the node and the corresponding HBA port used to communicate with that LUN.
+ is installed, then the agent will output output a list of stats for the disks.
 
 item:
- Disk Volume Name for the paths.
+ Disk Volume Name.
 
 inventory:
  One item is created for each disk volumes visible to the local system.

@@ -1,11 +1,11 @@
-title: Check for Apple CVADMIN, monitors volume statistics.
-agents: darwin
+title: Check for StoreNext CVADMIN, monitors volume statistics.
+agents: cvadmin
 author: Jeremy Leggat <jleggat@asu.edu>
 license: GPL
 distribution:
 description:
  This check makes use of the output of a working {cvadmin} on
- an OS X system. If the CVADMIN is properly configured and {cvadmin}
+ an StoreNext system. If the CVADMIN is properly configured and {cvadmin}
  is installed, then the agent will print out volume statistics.
 
 item:

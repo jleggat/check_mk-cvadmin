@@ -23,29 +23,23 @@
 # to the Free Software Foundation, Inc., 51 Franklin St,  Fifth Floor,
 # Boston, MA 02110-1301 USA.
 
-# Author: Jeremy Leggat <jleggat@asu.edu>
+# <<<cvadmin_fsmlist>>>
+#  VOLUME[1]  port 49432 pid 1613    State: REGISTERED 2015-01-06 11:46:45    Last Admin: START 2015-01-06 11:46:45    Last Termination: exit(17) 2015-01-06 11:46:45    Launches 2 core dumps 0 flags <CONFIGUREDAUTO-START>
 
-### Collect and dump CVADMIN information.
-# from `cvadmin -e fsmlist` will put out:
-# fsm	name index port pid ismaster state timestamp launchcount coredumps flags lastadminaction timestamp lastterminationcode timestamp
-# For each volume will put out `cvadmin -F Volume -e stat` with:
-# stats	volume timestamp activeconnections blocksize devices groups blockstotal blocksfree
-# and `cvadmin -F Volume -e show long` with:
-# stripe volume	number name status totalblocks reserverblocks freeblocks
-# not output with above: multipathmethod primarystripe readenabled writeenbaled
-# for paths:
-# paths	name device	hba	ctl	lun	state	controller
-# for disks:
-# disks	name device	sectors	sectorsize
 import re
+
+
+factory_settings["cvadmin_fsmlist_default_levels"] = {
+    "allowed_states": ["REGISTERED"]
+}
+
 
 def extract_fsm(text):
 	m = re.search('^\*?(\w+)\[\d+\]', text)
 	if m:
 		return m.group(1)
 
-## CVADMIN FSM
-# the inventory function
+
 def inventory_cvadmin_fsmlist(checkname, info):
     inventory = []
     for line in info:
@@ -56,15 +50,15 @@ def inventory_cvadmin_fsmlist(checkname, info):
     	if fs: inventory.append( (fs, params) )
     return inventory
 
-# the check function
+
 def check_cvadmin_fsmlist(item, params, info):
-    perfdata = []
-    infos = []
-    status = 0
     for line in info:
-    	# is this our line?
     	fs = extract_fsm(line[0])
     	if fs == item:
+			perfdata = []
+			infotext = []
+			worst_state = 0
+
 			port = list_get_next(line, "port")
 			pid = list_get_next(line, "pid")
 			launches = list_get_next(line, "Launches")
@@ -72,8 +66,6 @@ def check_cvadmin_fsmlist(item, params, info):
 			flags = list_get_next(line, "flags")
 			flags = re.sub('[<>]', '', flags)
 			state = list_get_next(line, "State:")
-#			ymd = list_get_next(line, state)
-#			hms = list_get_next(line, ymd)
 
 			this_time = time.time()
 
@@ -83,27 +75,30 @@ def check_cvadmin_fsmlist(item, params, info):
 			dump_timedif, dump_rate = get_counter( "cvadmin_fsmlist.coredumps.%s" % (item), this_time, int(dumps) )
 			perfdata.append( ( "core_dumps", dump_rate ) )
 
-			infos.append( state )
-			if state not in params["allowed_fsm_states"]:
-				infos[-1] += "(!!)"
-				status = max(status, 2)
+			infotext.append( state )
+			if state not in params["allowed_states"]:
+				worst_state = max(worst_state, 2)
 
 			if flags != params["flags"]:
-				infos.append ("flags: %s not %s as expected" % (flags, params["flags"]) )
-				infos[-1] += "(!)"
-				status = max(status, 1)
+				infotext.append ("flags: %s not %s as expected" % (flags, params["flags"]) )
+				worst_state = max(worst_state, 1)
 
-			infos.append ("pid: %s port: %s launch count: %s core dumps: %s" % (pid, port, launches, dumps) )
-			return (status, ", ".join(infos) , perfdata)
+			if worst_state == 1:
+				infotext[-1] += "(!)"
+			elif state == 2:
+				infotext[-1] += "(!!)"
 
-    return (3, "file system %s not found in agent output" % item)
+			infotext.append ("pid: %s port: %s launch count: %s core dumps: %s" % (pid, port, launches, dumps) )
+			return worst_state, ", ".join(infotext) , perfdata
 
-# declare the check to Check_MK
+    return 3, "File System %s not found" % item
+
+
 check_info["cvadmin_fsmlist"] = {
 	'check_function':			check_cvadmin_fsmlist,
 	'inventory_function':		inventory_cvadmin_fsmlist,
-	"service_description":		"CVADMIN Vol %s File System Master",
-	"default_levels_variable":	"cvadmin_default_levels",
+	"service_description":		"CVADMIN File System Master %s",
+	"default_levels_variable":	"cvadmin_fsmlist_default_levels",
 	"has_perfdata":				True,
     "includes"                : [ "cvadmin.include" ],
     "group"                   : "filesystem",

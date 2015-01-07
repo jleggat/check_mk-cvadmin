@@ -23,10 +23,6 @@
 # to the Free Software Foundation, Inc., 51 Franklin St,  Fifth Floor,
 # Boston, MA 02110-1301 USA.
 
-factory_settings["cvadmin_default_levels"] = {
-    "allowed_fsm_states" : ["REGISTERED"],
-    "path_not_found_level" : 1,
-}
 
 def list_get_next(L, value, v=None):
 	if value in L:
