@@ -24,68 +24,49 @@
 # to the Free Software Foundation, Inc., 51 Franklin St,  Fifth Floor,
 # Boston, MA 02110-1301 USA.
 
-# Author: Jeremy Leggat <jleggat@asu.edu>
+# <<<cvadmin_disks>>>
+# VOLUME     on device:rdisk18	sectors: 7324197855  sector size: 512
 
-### Collect and dump CVADMIN information.
-# from `cvadmin -e fsmlist` will put out:
-# fsm	name index port pid ismaster state timestamp launchcount coredumps flags lastadminaction timestamp lastterminationcode timestamp
-# For each volume will put out `cvadmin -F Volume -e stat` with:
-# stats	volume timestamp activeconnections blocksize devices groups blockstotal blocksfree
-# and `cvadmin -F Volume -e show long` with:
-# stripe volume	number name status totalblocks reserverblocks freeblocks
-# not output with above: multipathmethod primarystripe readenabled writeenbaled
-# for paths:
-# paths	name device	hba	ctl	lun	state	controller
-# for disks:
-# disks	name device	sectors	sectorsize
-import re
-from itertools import groupby
 
-## CVADMIN PATHS
-# the inventory function
 def inventory_cvadmin_disks(checkname, info):
     inventory = []
-	params = {}
+    params = {}
     for line in info:
-		params[line[0]] = {}
-    	params[line[0]]["sectors"] = list_get_next(line, "sectors:")
-    	params[line[0]]["sector_size"] = list_get_next(line, "size:")
-    inventory.append( (line[0], params) )
+		params = {}
+		params["sectors"] = list_get_next(line, "sectors:")
+		params["sector_size"] = list_get_next(line, "size:")
+		inventory.append( (line[0], params) )
     return inventory
 
-# the check function
+
 def check_cvadmin_disks(item, params, info):
-    infos = []
-    status = 0
     for line in info:
     	if line[0] == item:
-			state = list_get_next(line, "state:")
-			lun = list_get_next(line, "lun:")
-			ctl = list_get_next(line, "ctl:")
-			hba = list_get_next(line, "hba:")
-			device = list_get_next(line, "device:")
+			infotext = [line[2].partition(':')[2]]
+			worst_state = 0
+			sectors = list_get_next(line, "sectors:")
+			sector_size = list_get_next(line, "size:")
 
-			if state != params["state"]:
-				infos.append( "Expected %s state" % params["state"] )
-				infos[-1] += "(!!)"
-				status = max(status, 2)
-			infos.append( "current state %s" % state  )
-			infos.append( "hba %s" % hba )
-			infos.append( "controller %s" % ctl )
-			infos.append( "lun %s" % lun )
-			infos.append( "device name %s" % device )
+			if sectors != params["sectors"]:
+				infotext.append( "Sectors -- Expected %s Found" % params["sectors"] )
+				infotext[-1] += "(!!)"
+				worst_state = max(worst_state, 2)
+			infotext.append( "%s Sectors" % sectors )
+			if sector_size != params["sector_size"]:
+				infotext.append( "Sector Size -- Expected %s Found" %  params["sector_size"] )
+				infotext[-1] += "(!!)"
+				worst_state = max(worst_state, 2)
+			infotext.append( "%s Sector Size" % sector_size )
 
-			return ( status, ", ".join(infos) )
+			return worst_state, ", ".join(infotext)
 
-#    return (params["path_not_found_level"], "Path %s not found in agent output" % item)
+    return 3, "No disk %s found" % item
 
-# declare the check to Check_MK
+
 check_info["cvadmin_disks"] = {
 	'check_function':			check_cvadmin_disks,
 	'inventory_function':		inventory_cvadmin_disks,
-	"service_description":		"CVADMIN Path %s",
-	"default_levels_variable":	"cvadmin_default_levels",
+	"service_description":		"CVADMIN Disk %s",
     "includes"                : [ "cvadmin.include" ],
-	"has_perfdata":				False,
     "group"                   : "filesystem",
 }
