@@ -2,3 +2,5 @@
 checks/cvadmin_disksc
 
 checks/cvadmin_pathsc
+
+*.mkp
