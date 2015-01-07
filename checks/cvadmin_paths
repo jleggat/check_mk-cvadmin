@@ -33,6 +33,8 @@
 def inventory_cvadmin_paths(checkname, info):
     inventory = []
     for line in info:
+    	if line[0] == "Controller:":
+    		continue
     	params = {}
     	params["state"] = list_get_next(line, "state:")
     	inventory.append( (line[0], params) )
