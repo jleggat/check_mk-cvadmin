@@ -24,70 +24,49 @@
 # to the Free Software Foundation, Inc., 51 Franklin St,  Fifth Floor,
 # Boston, MA 02110-1301 USA.
 
-# Author: Jeremy Leggat <jleggat@asu.edu>
+# <<<xsan_paths>>>
+#
+# Controller: <default>
+#     VOLUME     on device: rdisk18      hba: 1 ctl: 0 lun: 1 state: Available
 
-### Collect and dump CVADMIN information.
-# from `cvadmin -e fsmlist` will put out:
-# fsm	name index port pid ismaster state timestamp launchcount coredumps flags lastadminaction timestamp lastterminationcode timestamp
-# For each volume will put out `cvadmin -F Volume -e stat` with:
-# stats	volume timestamp activeconnections blocksize devices groups blockstotal blocksfree
-# and `cvadmin -F Volume -e show long` with:
-# stripe volume	number name status totalblocks reserverblocks freeblocks
-# not output with above: multipathmethod primarystripe readenabled writeenbaled
-# for paths:
-# paths	name device	hba	ctl	lun	state	controller
-# for disks:
-# disks	name device	sectors	sectorsize
-import re
 
-## CVADMIN PATHS
-# the inventory function
 def inventory_cvadmin_paths(checkname, info):
     inventory = []
-#    controller = ""
     for line in info:
-    	if line[0] == 'Controller:':
- #   		controller = re.sub('[\<\>]', '', line[1])
-    		continue
     	params = {}
- #   	params["controller"] = controller
     	params["state"] = list_get_next(line, "state:")
     	inventory.append( (line[0], params) )
     return inventory
 
-# the check function
+
 def check_cvadmin_paths(item, params, info):
-    infos = []
-    status = 0
     for line in info:
     	if line[0] == item:
+			infotext = [list_get_next(line, "device:")]
+			worst_state = 0
 			state = list_get_next(line, "state:")
 			lun = list_get_next(line, "lun:")
 			ctl = list_get_next(line, "ctl:")
 			hba = list_get_next(line, "hba:")
-			device = list_get_next(line, "device:")
 
 			if state != params["state"]:
-				infos.append( "Expected %s state" % params["state"] )
-				infos[-1] += "(!!)"
-				status = max(status, 2)
-			infos.append( "current state %s" % state  )
-			infos.append( "hba %s" % hba )
-			infos.append( "controller %s" % ctl )
-			infos.append( "lun %s" % lun )
-			infos.append( "device name %s" % device )
+				infotext.append( "Expected %s State" % params["state"] )
+				infotext[-1] += "(!!)"
+				worst_state = max(worst_state, 2)
+			infotext.append( "Current State %s" % state  )
+			infotext.append( "HBA %s" % hba )
+			infotext.append( "Controller %s" % ctl )
+			infotext.append( "LUN %s" % lun )
 
-			return ( status, ", ".join(infos) )
+			return ( worst_state, ", ".join(infotext) )
 
-#    return (params["path_not_found_level"], "Path %s not found in agent output" % item)
+    return 3, "Path %s not found" % item
 
-# declare the check to Check_MK
+
 check_info["cvadmin_paths"] = {
 	'check_function':			check_cvadmin_paths,
 	'inventory_function':		inventory_cvadmin_paths,
 	"service_description":		"CVADMIN Path %s",
-	"default_levels_variable":	"cvadmin_default_levels",
     "includes"                : [ "cvadmin.include" ],
-	"has_perfdata":				False,
     "group"                   : "filesystem",
 }
