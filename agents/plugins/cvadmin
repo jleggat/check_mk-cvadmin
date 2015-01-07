@@ -1,14 +1,12 @@
 #!/bin/sh
 
-if uname 2>/dev/null | grep -qv Darwin; then
-  exit
-fi
+type cvadmin > /dev/null || exit 0
 
 # the $1=$1 is to rebuild the record, using the current OFS.
+
 FSM_OUT=$(cvadmin -e fsmlist 2>/dev/null | awk 'BEGIN { FS="\n"; RS="" } !/^ /{next} {gsub(/,/, ""); $1=$1}1')
 
-if [ -n "$FSM_OUT" ]
-then
+if [ -n "$FSM_OUT" ]; then
   echo '<<<cvadmin_fsmlist>>>'
   for fs in "$FSM_OUT"
   do
@@ -16,33 +14,32 @@ then
   done
 fi
 
-CVADMIN_VOLS=$(echo "$FSM_OUT" | sed -n 's/[ |\*]\(.*\)\[[0-9]\].*$/\1/p')
-if [ -n "$CVADMIN_VOLS" ]
-then
+FSM_VOLS=$(echo "$FSM_OUT" | sed -n 's/[ |\*]\(.*\)\[[0-9]\].*$/\1/p')
+if [ -n "$FSM_VOLS" ]; then
   echo '<<<cvadmin_stat>>>'
-  for VOL in $CVADMIN_VOLS
+  for VOL in $FSM_VOLS
   do
     cvadmin -F $VOL -e stat 2>/dev/null | awk -v VOL=$VOL 'BEGIN { OFS=""; ORS=" "; print VOL } !/^ /{next}  {$1=$1}1'
   	echo
   done
+
   echo '<<<cvadmin_show_long>>>'
-  for VOL in $CVADMIN_VOLS
+  for VOL in $FSM_VOLS
   do
     cvadmin -F $VOL -e show long 2>/dev/null | awk -v VOL=$VOL 'BEGIN { FS="\n"; RS="" } !/^Stripe Group/{next}  {$1=$1; print VOL, $0}'
     echo
   done
 fi
 
-PATHS_OUT=$(cvadmin -e paths 2>/dev/null | sed -e '1,/acfs/d')
-if [ -n "$PATHS_OUT" ]
-then
+CVADMIN_VOLS=$(cvadmin -e select | sed  -n 's/ [0-9]*>.\([A-z0-9]*\)\[.*/\1/p' | sort | uniq)
+if [ -n "$CVADMIN_VOLS" ]; then
   echo '<<<cvadmin_paths>>>'
-  echo "$PATHS_OUT"
-fi
+  for VOL in $FSM_VOLS
+    cvadmin -F $VOL -e paths 2>/dev/null | sed -e '1,/acfs/d' | xargs -L1 echo $VOL
+  done
 
-DISKS_OUT=$(cvadmin -e disks 2>/dev/null | sed -e '1,/acfs/d')
-if [ -n "$DISKS_OUT" ]
-then
   echo '<<<cvadmin_disks>>>'
-  echo "$DISKS_OUT"
+  for VOL in $FSM_VOLS
+    cvadmin -F $VOL -e disks 2>/dev/null | sed -e '1,/acfs/d' | xargs -L1 echo $VOL
+  done
 fi
