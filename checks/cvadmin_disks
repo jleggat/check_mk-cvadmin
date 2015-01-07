@@ -49,14 +49,15 @@ def check_cvadmin_disks(item, params, info):
 
 			if sectors != params["sectors"]:
 				infotext.append( "Sectors -- Expected %s Found" % params["sectors"] )
-				infotext[-1] += "(!!)"
 				worst_state = max(worst_state, 2)
 			infotext.append( "%s Sectors" % sectors )
 			if sector_size != params["sector_size"]:
 				infotext.append( "Sector Size -- Expected %s Found" %  params["sector_size"] )
-				infotext[-1] += "(!!)"
 				worst_state = max(worst_state, 2)
 			infotext.append( "%s Sector Size" % sector_size )
+
+			if worst_state == 2:
+				infotext[-1] += "(!!)"
 
 			return worst_state, ", ".join(infotext)
 

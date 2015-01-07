@@ -53,12 +53,15 @@ def check_cvadmin_paths(item, params, info):
 
 			if state != params["state"]:
 				infotext.append( "Expected %s State" % params["state"] )
-				infotext[-1] += "(!!)"
 				worst_state = max(worst_state, 2)
 			infotext.append( "Current State %s" % state  )
 			infotext.append( "HBA %s" % hba )
 			infotext.append( "Controller %s" % ctl )
 			infotext.append( "LUN %s" % lun )
+
+			if worst_state == 2:
+				infotext[-1] += "(!!)"
+
 
 			return ( worst_state, ", ".join(infotext) )
 
