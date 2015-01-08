@@ -12,7 +12,7 @@ item:
  Disk Volume Name.
 
 inventory:
- One item is created for each disk volumes visible to the local system.
+ One item is created for each disk volume visible to the local system.
 
 perfdata:
 
