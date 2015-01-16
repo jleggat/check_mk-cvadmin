@@ -14,7 +14,40 @@ item:
 inventory:
  One item per volume if system is a CVADMIN Controller.
 
-perfdata:
- block free percentage, blocks free total.
 
 [parameters]
+
+
+
+
+title: Connected SNFS Volume Disks
+agents: cvadmin
+author: Jeremy Leggat <jleggat@asu.edu>
+license: GPL
+distribution: check_mk
+description:
+ This check monitors the free space for volumes when system is a FSM on
+ StorNext File Systems (SNFS) such as Apples's Xsan.  This check makes use
+ of the output of a working {cvadmin} command.
+
+ Returns {CRIT} if the sectors do not match sectors found during inventory.
+
+ Returns {CRIT} if the sector_size do not match sector_size found during inventory.
+
+ Returns {OK} otherwise.
+
+item:
+ SNFS Volume Name.
+
+inventory:
+ One item is created for each SNFS volume visible to the FSM system.
+
+[parameters]
+parameters (dict):
+
+ {"sectors"}: (int): the number of sectors found during inventory
+
+ {"sector_size"}: (int): the sector size found during inventory
+
+perfdata:
+ block free percentage, blocks free total.

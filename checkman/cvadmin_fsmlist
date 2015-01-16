@@ -1,22 +1,29 @@
-title: Check for StoreNext CVADMIN, monitors any FSM processes on the machine.
+title: state of FSM processes for SNFS Volumes
 agents: cvadmin
 author: Jeremy Leggat <jleggat@asu.edu>
 license: GPL
-distribution:
+distribution: check_mk
 description:
- This check makes use of the output of a working {cvadmin} on
- an StoreNext system. If the CVADMIN is properly configured and the system is a
- file system master, then the fsmlist contains the names of all
- volumes hosted on your SAN.
+ This check monitors the state of FSM processes, running or not, on StorNext
+ File Systems (SNFS) such as Apples's Xsan.  This check makes use of the output
+ of a working {cvadmin} command.
+
+ Returns {CRIT} if the state does not match state specified in allowed_states
+ paramater, default is "REGISTERED".
+
+ Returns {WARN} if the flags do not match flags found during inventory.
+
+ Returns {OK} otherwise.
 
 item:
- The Volume name.
+ SNFS Volume Name.
 
 inventory:
- One FSM processe is created per volumes if system is a CVADMIN Controller.
-
-perfdata:
- FSM check launch count and core dump count.
+ One item is created for each volume the system is a File System Master.
 
 [parameters]
-allowed_fsm_states (string): The state the volume is to report to return OK.
+parameters (dict):
+
+ {"allowed_states"}: (list of strings): the states for which {OK} is returned.
+
+ {"flags"}: the fs flags found during inventory

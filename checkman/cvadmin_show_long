@@ -1,21 +1,49 @@
-title: Check for StoreNext CVADMIN, monitors stripe groups and storage pools.
+title: SNFS Stripe Groups
 agents: cvadmin
 author: Jeremy Leggat <jleggat@asu.edu>
 license: GPL
-distribution:
+distribution: check_mk
 description:
- This check makes use of the output of a working {cvadmin} on
- an StoreNext system. If the CVADMIN is properly configured and {cvadmin}
- is installed, then the agent will will output information about
- the stripe groups/storage pools used by this volume.
+ This check monitors the storage pools for system which are FSM for on StorNext
+ File Systems (SNFS) such as Apples's Xsan.  This check makes use of the output
+ of a working {cvadmin} command.
+
+ Returns {CRIT} if the status does not match sectors found during inventory.
+
+ Returns {WARN} if the read enabled does not match read enabled found during
+ inventory.
+
+ Returns {WARN} if the write enabled does not match write enabled found during
+ inventory.
+
+ Returns {WARN} if the MultiPath Method does not match MultiPath Method found
+ during inventory.
+
+ Returns {WARN} if the Total Blocks do not match Total Blocks found during
+ inventory.
+
+ Returns {WARN} if the Reserved Blocks do not match Reserved Blocks found
+ during inventory.
+
+ Returns {OK} otherwise.
 
 item:
- The name of the Volume and index number for each stripe group.
+ The name of the Volume and index number for each stripe group, separated by a dot.
 
 inventory:
- Stripe groups collects info for the storage pools associated with volumes on the system.
- stat, the general status of the volume.
+ One item is created for each Stripe Group visible to the local system.
 
-perfdata:
+[parameters]
+parameters (dict):
 
-examples:
+ {"status"}: the status found during inventory
+
+ {"blocks"}: (int): the total blocks found during inventory
+
+ {"reserved"}: (int): the reserved blocks found during inventory
+
+ {"method"}: the multipath method found during inventory
+
+ {"read"}: the read enabled state found during inventory
+
+ {"write"}: the write enabled state found during inventory

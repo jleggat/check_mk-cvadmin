@@ -4,3 +4,5 @@ checks/cvadmin_disksc
 checks/cvadmin_pathsc
 
 *.mkp
+
+checks/cvadmin_statc

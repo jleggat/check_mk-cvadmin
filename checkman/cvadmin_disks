@@ -1,12 +1,18 @@
-title: Check for StoreNext CVADMIN,
+title: Connected SNFS Volume Disks
 agents: cvadmin
 author: Jeremy Leggat <jleggat@asu.edu>
 license: GPL
-distribution:
+distribution: check_mk
 description:
- This check makes use of the output of a working {cvadmin} on
- an StoreNext system. If the CVADMIN is properly configured and {cvadmin}
- is installed, then the agent will output output a list of stats for the disks.
+ This check monitors the state of disk volumes local to the system on StorNext
+ File Systems (SNFS) such as Apples's Xsan.  This check makes use of the output
+ of a working {cvadmin} command.
+
+ Returns {CRIT} if the sectors do not match sectors found during inventory.
+
+ Returns {CRIT} if the sector_size do not match sector_size found during inventory.
+
+ Returns {OK} otherwise.
 
 item:
  Disk Volume Name.
@@ -14,6 +20,9 @@ item:
 inventory:
  One item is created for each disk volume visible to the local system.
 
-perfdata:
-
 [parameters]
+parameters (dict):
+
+ {"sectors"}: (int): the number of sectors found during inventory
+
+ {"sector_size"}: (int): the sector size found during inventory

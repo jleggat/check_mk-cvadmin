@@ -1,20 +1,53 @@
-title: Check for StoreNext CVADMIN, monitors volume statistics.
+title: General Status of SNFS Volumes.
 agents: cvadmin
 author: Jeremy Leggat <jleggat@asu.edu>
 license: GPL
-distribution:
+distribution: check_mk
 description:
- This check makes use of the output of a working {cvadmin} on
- an StoreNext system. If the CVADMIN is properly configured and {cvadmin}
- is installed, then the agent will print out volume statistics.
+ This check monitors the state of disk volumes local to the system on StorNext
+ File Systems (SNFS) such as Apples's Xsan.  This check makes use of the output
+ of a working {cvadmin} command.
+
+ Returns {CRIT} if the number of disk devices do not match the number of disk
+ devices found during inventory.
+
+ Returns {CRIT} if the number of fs blocks do not match number of fs blocks
+ found during inventory.
+
+ Returns {CRIT} if the fs block size do not match fs block size found during
+ inventory.
+
+ Returns {CRIT} if the msg buffer size do not match msg buffer size found during
+ inventory.
+
+ Returns {WARN} if the date created does not match date created found during
+ inventory.
+
+ Returns {WARN} if the msg buffer size does not match msg buffer size found
+ during inventory.
+
+ Returns {OK} otherwise.
 
 item:
- The Volume name.
+ SNFS Volume Name.
 
 inventory:
- One item per volume if system is a CVADMIN Controller.
+ One item per volume if system is a FSM.
+
+[parameters]
+parameters (dict):
+
+ {"created"}: the date created found during inventory
+
+ {"blocks"}: the number of fs blocks found during inventory
+
+ {"blocksize"}: the fs block size found during inventory
+
+ {"buffersize"}: the msg buffer size found during inventory
+
+ {"diskdevices"}: (int): the number of disk devices found during inventory
+
+ {"stripegroups"}: (int): the number of stripe groups found during inventory
 
 perfdata:
  Connections.
-
-[parameters]

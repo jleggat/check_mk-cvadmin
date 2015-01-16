@@ -1,20 +1,26 @@
-title: Check for StoreNext CVADMIN,
+title: Connected SNFS Volume Paths
 agents: cvadmin
 author: Jeremy Leggat <jleggat@asu.edu>
 license: GPL
-distribution:
+distribution: check_mk
 description:
- This check makes use of the output of a working {cvadmin} on
- an StoreNext system. If the CVADMIN is properly configured and {cvadmin}
- is installed, then the agent will output output a list of LUNs visible
- to the node and the corresponding HBA port used to communicate with that LUN.
+ This check monitors the state of local volume paths on StorNext
+ File Systems (SNFS) such as Apples's Xsan.  This check makes use of the output
+ of a working {cvadmin} command.  It alerts if the "Active" or "Passive" nature
+ of volume has changed since inventory.
+
+ Returns {CRIT} if the returned state does not match state found during inventory.
+
+ Returns {OK} otherwise when states match.
 
 item:
- Disk Volume Name for the paths.
+ SNFS Volume Name.
 
 inventory:
- One item is created for each disk volumes visible to the local system.
-
-perfdata:
+ One item is created for each disk volume path visible to the local system.
 
 [parameters]
+parameters (dict):
+
+ {"state"}: the "Active" or "Passive" nature of the path found during
+ inventory
