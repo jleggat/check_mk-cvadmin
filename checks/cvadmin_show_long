@@ -35,8 +35,8 @@ def inventory_cvadmin_show_long(checkname, info):
 		params = {}
 		params["index"] = line[3]
 		params["status"] = line[5].partition(':')[2]
-		params["blocks"] = line[7].partition(':')[2]
-		params["reserved"] = line[10].partition(':')[2]
+		params["blocks"] = int( line[7].partition(':')[2] )
+		params["reserved"] = int( line[10].partition(':')[2] )
 		params["method"] = line[18].partition(':')[2]
 		params["read"] = line[22].partition(':')[2]
 		params["write"] = line[23].partition(':')[2]
@@ -53,8 +53,8 @@ def check_cvadmin_show_long(item, params, info):
 
 			index = line[3]
 			status = line[5].partition(':')[2]
-			blocks = line[7].partition(':')[2]
-			reserved = line[10].partition(':')[2]
+			blocks = int( line[7].partition(':')[2] )
+			reserved = int( line[10].partition(':')[2] )
 			method = line[18].partition(':')[2]
 			read = line[22].partition(':')[2]
 			write = line[23].partition(':')[2]
@@ -80,11 +80,11 @@ def check_cvadmin_show_long(item, params, info):
 				worst_state = max(worst_state, 1)
 
 			if blocks != params["blocks"]:
-				infotext.append ("%s Total Blocks but %s expected" % (blocks, params["blocks"]) )
+				infotext.append ("%d Total Blocks but %d expected" % (blocks, params["blocks"]) )
 				worst_state = max(worst_state, 1)
 
 			if reserved != params["reserved"]:
-				infotext.append ("%s Reserved Blocks but %s expected" % (reserved, params["reserved"]) )
+				infotext.append ("%d Reserved Blocks but %d expected" % (reserved, params["reserved"]) )
 				worst_state = max(worst_state, 1)
 
 			infotext.append( "%s %s" % (line[8], line[9]) )

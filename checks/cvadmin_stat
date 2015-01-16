@@ -61,8 +61,8 @@ def inventory_cvadmin_stat_info(checkname, info):
         params["created"] = line[1].partition(':')[2]
         params["blocksize"] = line[3].partition(':')[2]
         params["buffersize"] = line[4].partition(':')[2]
-        params["diskdevices"] = line[5].partition(':')[2]
-        params["stripegroups"] = line[6].partition(':')[2]
+        params["diskdevices"] = int( line[5].partition(':')[2] )
+        params["stripegroups"] = int( line[6].partition(':')[2] )
         params["blocks"] = line[7].partition(':')[2]
         inventory.append( (line[0], params) )
     return inventory
@@ -77,37 +77,37 @@ def check_cvadmin_stat_info(item, params, info):
             worst_state = 0
 
             created = line[1].partition(':')[2]
-            connections = line[2].partition(':')[2]
+            connections = int( line[2].partition(':')[2] )
             blocksize = line[3].partition(':')[2]
             buffersize = line[4].partition(':')[2]
-            diskdevices = line[5].partition(':')[2]
-            stripegroups = line[6].partition(':')[2]
+            diskdevices = int( line[5].partition(':')[2] )
+            stripegroups = int( line[6].partition(':')[2] )
             blocks = line[7].partition(':')[2]
 
             perfdata.append( ( "ActiveConnections", int(connections) ) )
-            infotext.append( "%s ActiveConnections" % connections )
+            infotext.append( "%d Active Connections" % connections )
 
-            infotext.append( "%s StripeGroups" % stripegroups )
+            infotext.append( "%d Stripe Groups" % stripegroups )
             if stripegroups != params["stripegroups"]:
-                infotext.append( "Expected %s" % params["stripegroups"] )
+                infotext.append( "Expected %d" % params["stripegroups"] )
                 worst_state = max(worst_state, 2)
 
-            infotext.append( "%s DiskDevices" % diskdevices )
+            infotext.append( "%d Disk Devices" % diskdevices )
             if diskdevices != params["diskdevices"]:
-                infotext.append( "Expected %s" % params["diskdevices"] )
+                infotext.append( "Expected %d" % params["diskdevices"] )
                 worst_state = max(worst_state, 2)
 
-            infotext.append( "%s FsBlocks" % blocks )
+            infotext.append( "%s Fs Blocks" % blocks )
             if blocks != params["blocks"]:
                 infotext.append( "Expected %s" % params["blocks"] )
                 worst_state = max(worst_state, 2)
 
-            infotext.append( "%s FsBlockSize" % blocksize )
+            infotext.append( "%s Fs Block Size" % blocksize )
             if blocksize != params["blocksize"]:
                 infotext.append( "Expected %s" % params["blocksize"] )
                 worst_state = max(worst_state, 2)
 
-            infotext.append( "%s MsgBufferSize" % buffersize )
+            infotext.append( "%s Msg Buffer Size" % buffersize )
             if buffersize != params["buffersize"]:
                 infotext.append( "Expected %s" % params["buffersize"] )
                 infotext[-1] += "(!)"
@@ -131,7 +131,6 @@ check_info['cvadmin_stat.df'] = {
     "inventory_function"      : inventory_cvadmin_stat_df,
     "check_function"          : check_cvadmin_stat_df,
     "service_description"     : "CVADMIN fs_%s",
-    "default_levels_variable" : "cvadmin_default_levels",
     "includes"                : [ "df.include", "cvadmin.include" ],
     "has_perfdata"            : True,
     "group"                   : "filesystem",

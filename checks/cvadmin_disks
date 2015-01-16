@@ -33,8 +33,8 @@ def inventory_cvadmin_disks(checkname, info):
     params = {}
     for line in info:
 		params = {}
-		params["sectors"] = list_get_next(line, "sectors:")
-		params["sector_size"] = list_get_next(line, "size:")
+		params["sectors"] = int( list_get_next(line, "sectors:") )
+		params["sector_size"] = int( list_get_next(line, "size:") )
 		inventory.append( (line[0], params) )
     return inventory
 
@@ -44,17 +44,17 @@ def check_cvadmin_disks(item, params, info):
     	if line[0] == item:
 			infotext = [line[2].partition(':')[2]]
 			worst_state = 0
-			sectors = list_get_next(line, "sectors:")
-			sector_size = list_get_next(line, "size:")
+			sectors = int( list_get_next(line, "sectors:") )
+			sector_size = int( list_get_next(line, "size:") )
 
 			if sectors != params["sectors"]:
-				infotext.append( "Sectors -- Expected %s Found" % params["sectors"] )
+				infotext.append( "Sectors -- Expected %d Found" % params["sectors"] )
 				worst_state = max(worst_state, 2)
-			infotext.append( "%s Sectors" % sectors )
+			infotext.append( "%d Sectors" % sectors )
 			if sector_size != params["sector_size"]:
-				infotext.append( "Sector Size -- Expected %s Found" %  params["sector_size"] )
+				infotext.append( "Sector Size -- Expected %d Found" %  params["sector_size"] )
 				worst_state = max(worst_state, 2)
-			infotext.append( "%s Sector Size" % sector_size )
+			infotext.append( "%d Sector Size" % sector_size )
 
 			if worst_state == 2:
 				infotext[-1] += "(!!)"
