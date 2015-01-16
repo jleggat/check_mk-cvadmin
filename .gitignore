@@ -1,8 +1,6 @@
-
-checks/cvadmin_disksc
-
-checks/cvadmin_pathsc
-
+build/
 *.mkp
 
+checks/cvadmin_disksc
+checks/cvadmin_pathsc
 checks/cvadmin_statc
