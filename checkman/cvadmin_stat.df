@@ -1,40 +1,16 @@
-title: Check for StoreNext CVADMIN, monitors volume statistics.
-agents: cvadmin
-author: Jeremy Leggat <jleggat@asu.edu>
-license: GPL
-distribution:
-description:
- This check makes use of the output of a working {cvadmin} on
- an StoreNext system. If the CVADMIN is properly configured and {cvadmin}
- is installed, then the agent will print out volume statistics.
-
-item:
- The Volume name.
-
-inventory:
- One item per volume if system is a CVADMIN Controller.
-
-
-[parameters]
-
-
-
-
 title: Connected SNFS Volume Disks
 agents: cvadmin
 author: Jeremy Leggat <jleggat@asu.edu>
 license: GPL
 distribution: check_mk
 description:
- This check monitors the free space for volumes when system is a FSM on
- StorNext File Systems (SNFS) such as Apples's Xsan.  This check makes use
- of the output of a working {cvadmin} command.
+ This check monitors the file system of volumes on systems that are a FSM on
+ StorNext File Systems (SNFS) such as Apples's Xsan.  it uses the output of a
+ working {cvadmin} command.
 
- Returns {CRIT} if the sectors do not match sectors found during inventory.
-
- Returns {CRIT} if the sector_size do not match sector_size found during inventory.
-
- Returns {OK} otherwise.
+ The check makes use of the general check framework of the {df} check. Please
+ refer to the man page of the {df} check for the detailed description of
+ the check and its numerous features.
 
 item:
  SNFS Volume Name.
@@ -42,12 +18,8 @@ item:
 inventory:
  One item is created for each SNFS volume visible to the FSM system.
 
-[parameters]
-parameters (dict):
-
- {"sectors"}: (int): the number of sectors found during inventory
-
- {"sector_size"}: (int): the sector size found during inventory
-
 perfdata:
- block free percentage, blocks free total.
+ See the man page of the {df} check
+
+[parameters]
+parameters (dict): See the man page of the {df} check
